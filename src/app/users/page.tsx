@@ -36,6 +36,8 @@ const SortIcon = ({ sortDir }: { sortDir: SortDir }) => {
 export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [sortDir, setSortDir] = useState<SortDir>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 5;
 
   const {
     data: users,
@@ -61,6 +63,9 @@ export default function UsersPage() {
     return result;
   }, [users, search, sortDir]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   const toggleRow = (id: number) => {
     router.push(`/users/${id}`);
   };
@@ -71,6 +76,7 @@ export default function UsersPage() {
       if (prev === "asc") return "desc";
       return null;
     });
+    setPage(1);
   };
 
   return (
@@ -82,7 +88,7 @@ export default function UsersPage() {
           type="search"
           placeholder="Search by name or email…"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="w-full sm:w-72"
           aria-label="Search users"
         />
@@ -99,7 +105,7 @@ export default function UsersPage() {
       )}
 
       {!isError && (
-        <div className="rounded-xl border">
+        <div className="rounded-xl p-3 border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -144,7 +150,7 @@ export default function UsersPage() {
                         </TableCell>
                       </TableRow>
                     ))
-                  : filtered?.map((user: User) => {
+                  : paginated.map((user: User) => {
                       return (
                         <TableRow
                           key={user.id}
@@ -175,6 +181,32 @@ export default function UsersPage() {
               </TableBody>
             )}
           </Table>
+        </div>
+      )}
+
+      {!isError && !isLoading && filtered.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-sm text-muted-foreground">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       )}
     </div>
