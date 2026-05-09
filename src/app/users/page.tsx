@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ExternalLink } from "lucide-react";
 
 import { User } from "@/lib/types";
 import { fetchUsers } from "@/lib/api";
@@ -20,10 +20,22 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+
+type SortDir = "asc" | "desc" | null;
+
+const SortIcon = ({ sortDir }: { sortDir: SortDir }) => {
+  if (sortDir === "asc") return <ArrowUp className="ml-1 h-3.5 w-3.5" />;
+  if (sortDir === "desc") return <ArrowDown className="ml-1 h-3.5 w-3.5" />;
+  return <ArrowUpDown className="ml-1 h-3.5 w-3.5 text-muted-foreground" />;
+};
 
 export default function UsersPage() {
   const [search, setSearch] = useState("");
+  const [sortDir, setSortDir] = useState<SortDir>(null);
 
   const {
     data: users,
@@ -38,15 +50,28 @@ export default function UsersPage() {
   const filtered = useMemo(() => {
     if (!users) return [];
     const q = search.toLowerCase();
-    return users.filter(
+    const result = users.filter(
       (u) =>
         u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
     );
-  }, [users, search]);
+    if (sortDir === "asc")
+      return [...result].sort((a, b) => a.name.localeCompare(b.name));
+    if (sortDir === "desc")
+      return [...result].sort((a, b) => b.name.localeCompare(a.name));
+    return result;
+  }, [users, search, sortDir]);
 
-  function toggleRow(id: number) {
+  const toggleRow = (id: number) => {
     router.push(`/users/${id}`);
-  }
+  };
+
+  const cycleSortDir = () => {
+    setSortDir((prev) => {
+      if (prev === null) return "asc";
+      if (prev === "asc") return "desc";
+      return null;
+    });
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -78,7 +103,18 @@ export default function UsersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={cycleSortDir}
+                    className="flex items-center gap-0 px-0 font-medium hover:bg-transparent"
+                    aria-label={`Sort by name ${sortDir === "asc" ? "descending" : "ascending"}`}
+                  >
+                    Name
+                    <SortIcon sortDir={sortDir} />
+                  </Button>
+                </TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead className="hidden sm:table-cell">Website</TableHead>
               </TableRow>
@@ -121,15 +157,16 @@ export default function UsersPage() {
                           <TableCell className="text-muted-foreground">
                             {user.email}
                           </TableCell>
-                          <TableCell className="text-muted-foreground hidden sm:table-cell">
+                          <TableCell className="hidden sm:table-cell">
                             <a
                               href={`https://${user.website}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="hover:text-blue-600"
+                              className="inline-flex items-center gap-1 text-muted-foreground hover:text-blue-600 transition-colors"
                               onClick={(e) => e.stopPropagation()}
                             >
                               {user.website}
+                              <ExternalLink className="h-3 w-3 shrink-0" />
                             </a>
                           </TableCell>
                         </TableRow>
