@@ -16,11 +16,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+import { useMemo, useState } from "react";
+
 export default function UsersPage() {
+  const [search, setSearch] = useState("");
+
   const {
     data: users,
     isLoading,
@@ -31,6 +35,15 @@ export default function UsersPage() {
   });
   const router = useRouter();
 
+  const filtered = useMemo(() => {
+    if (!users) return [];
+    const q = search.toLowerCase();
+    return users.filter(
+      (u) =>
+        u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q),
+    );
+  }, [users, search]);
+
   function toggleRow(id: number) {
     router.push(`/users/${id}`);
   }
@@ -38,6 +51,17 @@ export default function UsersPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-medium text-gray-900 mb-6">Users</h1>
+
+      <div className="flex gap-3 items-center mb-6">
+        <Input
+          type="search"
+          placeholder="Search by name or email…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full sm:w-72"
+          aria-label="Search users"
+        />
+      </div>
 
       {isError && (
         <Alert variant="destructive">
@@ -60,49 +84,59 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
 
-            <TableBody>
-              {isLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Skeleton className="h-4 w-32" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-4 w-48" />
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell">
-                        <Skeleton className="h-4 w-36" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : users?.map((user: User) => {
-                    return (
-                      <TableRow
-                        key={user.id}
-                        className="cursor-pointer"
-                        onClick={() => toggleRow(user.id)}
-                      >
-                        <TableCell className="font-medium">
-                          {user.name}
+            {filtered.length === 0 && !isLoading ? (
+              <TableBody>
+                <TableRow>
+                  <TableCell colSpan={3} className="text-center">
+                    No users found.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            ) : (
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-4 w-32" />
                         </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {user.email}
+                        <TableCell>
+                          <Skeleton className="h-4 w-48" />
                         </TableCell>
-                        <TableCell className="text-muted-foreground hidden sm:table-cell">
-                          <a
-                            href={`https://${user.website}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-blue-600"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {user.website}
-                          </a>
+                        <TableCell className="hidden sm:table-cell">
+                          <Skeleton className="h-4 w-36" />
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
-            </TableBody>
+                    ))
+                  : filtered?.map((user: User) => {
+                      return (
+                        <TableRow
+                          key={user.id}
+                          className="cursor-pointer"
+                          onClick={() => toggleRow(user.id)}
+                        >
+                          <TableCell className="font-medium">
+                            {user.name}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {user.email}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground hidden sm:table-cell">
+                            <a
+                              href={`https://${user.website}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="hover:text-blue-600"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {user.website}
+                            </a>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+              </TableBody>
+            )}
           </Table>
         </div>
       )}
