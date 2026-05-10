@@ -1,6 +1,6 @@
 # User Dashboard
 
-A Next.js 15 user dashboard that displays a list of users with search, filter, sort, and pagination — plus a detailed profile page per user showing their posts and todos.
+A Next.js 16 user dashboard that displays a list of users with search, filter, sort, and pagination — plus a detailed profile page per user showing their posts and todos.
 
 Data is fetched from [JSONPlaceholder](https://jsonplaceholder.typicode.com), a free public REST API for testing and prototyping.
 
