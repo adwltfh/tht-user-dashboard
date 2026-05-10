@@ -21,11 +21,14 @@ const PostsList = ({ posts }: { posts: Post[] }) => {
   return (
     <div className="space-y-4">
       {visible.map((post) => (
-        <div key={post.id} className="space-y-1">
+        <div
+          key={post.id}
+          className="rounded-lg border bg-muted/20 p-3 hover:bg-muted/40 transition-colors"
+        >
           <p className="text-sm font-medium leading-snug line-clamp-1 capitalize">
             {post.title}
           </p>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
             {post.body}
           </p>
         </div>

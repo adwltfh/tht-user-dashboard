@@ -27,8 +27,11 @@ const TodosList = ({ todos }: { todos: Todo[] }) => {
           </p>
           <ul className="space-y-1.5">
             {pending.map((todo) => (
-              <li key={todo.id} className="flex items-start gap-2 text-sm">
-                <Square className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+              <li
+                key={todo.id}
+                className="flex items-start gap-2 text-sm rounded-md px-2 py-1 -mx-2 hover:bg-muted/50 transition-colors"
+              >
+                <Square className="h-4 w-4 mt-0.5 shrink-0 text-amber-500" />
                 <span className="capitalize">{todo.title}</span>
               </li>
             ))}
@@ -61,8 +64,11 @@ const TodosList = ({ todos }: { todos: Todo[] }) => {
           {completedOpen && (
             <ul className="space-y-1.5">
               {completed.map((todo) => (
-                <li key={todo.id} className="flex items-start gap-2 text-sm">
-                  <CheckSquare className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+                <li
+                  key={todo.id}
+                  className="flex items-start gap-2 text-sm rounded-md px-2 py-1 -mx-2 hover:bg-muted/50 transition-colors"
+                >
+                  <CheckSquare className="h-4 w-4 mt-0.5 shrink-0 text-emerald-500" />
                   <span className="line-through text-muted-foreground capitalize">
                     {todo.title}
                   </span>

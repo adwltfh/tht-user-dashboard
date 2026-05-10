@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 
 import { Post, Todo } from "@/lib/types";
 import { fetchUser, fetchUserPosts, fetchUserTodos } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronLeft } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -39,6 +40,25 @@ export const generateMetadata = async ({
   }
 };
 
+const AVATAR_COLORS = [
+  "bg-violet-500",
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+];
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+const getAvatarColor = (id: number) => AVATAR_COLORS[id % AVATAR_COLORS.length];
+
 const Section = ({
   title,
   children,
@@ -48,9 +68,12 @@ const Section = ({
 }) => {
   return (
     <div className="py-5">
-      <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-        {title}
-      </h2>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="h-3.5 w-0.5 rounded-full bg-blue-500" />
+        <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {title}
+        </h2>
+      </div>
       <div>{children}</div>
     </div>
   );
@@ -91,15 +114,28 @@ const UserDetailPage = async ({ params }: Props) => {
     <main className="max-w-2xl mx-auto px-4 py-10">
       <Link
         href="/users"
-        className="inline-flex items-center gap-1 mb-6 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-1 mb-6 text-sm text-muted-foreground hover:text-foreground transition-colors group"
       >
+        <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
         Back to list
       </Link>
 
       <Card>
         <CardHeader className="border-b">
-          <CardTitle className="text-xl truncate">{user.name}</CardTitle>
-          <CardDescription>@{user.username}</CardDescription>
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "h-11 w-11 rounded-full flex items-center justify-center text-white text-lg font-semibold shrink-0",
+                getAvatarColor(user.id),
+              )}
+            >
+              {getInitials(user.name)}
+            </div>
+            <div className="min-w-0">
+              <CardTitle className="text-xl truncate">{user.name}</CardTitle>
+              <CardDescription>@{user.username}</CardDescription>
+            </div>
+          </div>
         </CardHeader>
 
         <CardContent className="pt-0 pb-0">

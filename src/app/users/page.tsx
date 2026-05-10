@@ -14,6 +14,7 @@ import {
 
 import { User } from "@/lib/types";
 import { fetchAllPosts, fetchAllTodos, fetchUsers } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -38,6 +39,25 @@ interface UserStats {
   completedTodos: number;
   pendingTodos: number;
 }
+
+const AVATAR_COLORS = [
+  "bg-violet-500",
+  "bg-blue-500",
+  "bg-emerald-500",
+  "bg-amber-500",
+  "bg-rose-500",
+  "bg-cyan-500",
+];
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+const getAvatarColor = (id: number) => AVATAR_COLORS[id % AVATAR_COLORS.length];
 
 const SortIcon = ({
   active,
@@ -75,7 +95,7 @@ const UsersContent = () => {
       }
     }
     router.replace(`/users?${next.toString()}`, { scroll: false });
-  }
+  };
 
   const setSearch = (val: string) => {
     updateParams({ q: val, page: null });
@@ -199,9 +219,14 @@ const UsersContent = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-medium text-gray-900 mb-6">Users</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight">Users</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          Browse and manage your user base
+        </p>
+      </div>
 
-      <div className="flex flex-wrap gap-3 items-center mb-6">
+      <div className="flex flex-wrap gap-3 items-center mb-2">
         <Input
           type="search"
           placeholder="Search by name or email…"
@@ -221,6 +246,12 @@ const UsersContent = () => {
           <option value="no-completed">No completed todos</option>
         </select>
       </div>
+
+      {users && !usersError && (
+        <p className="text-xs text-muted-foreground text-right mb-4">
+          {filtered.length} {filtered.length === 1 ? "user" : "users"}
+        </p>
+      )}
 
       {usersError && (
         <Alert variant="destructive">
@@ -319,8 +350,18 @@ const UsersContent = () => {
                           className="cursor-pointer"
                           onClick={() => goToUser(user.id)}
                         >
-                          <TableCell className="font-medium max-w-45 truncate">
-                            {user.name}
+                          <TableCell className="font-medium max-w-45">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div
+                                className={cn(
+                                  "h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0",
+                                  getAvatarColor(user.id),
+                                )}
+                              >
+                                {getInitials(user.name)}
+                              </div>
+                              <span className="truncate">{user.name}</span>
+                            </div>
                           </TableCell>
                           <TableCell className="text-muted-foreground max-w-50 truncate">
                             {user.email}
@@ -376,45 +417,58 @@ const UsersContent = () => {
                 <Card
                   key={user.id}
                   size="sm"
-                  className="cursor-pointer hover:ring-foreground/20 transition-shadow"
+                  className="cursor-pointer hover:shadow-sm transition-all"
                   onClick={() => goToUser(user.id)}
                 >
-                  <CardContent className="space-y-2">
-                    <div>
-                      <p className="font-medium truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {user.company.name}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {statsLoading ? (
-                        <>
-                          <Skeleton className="h-4 w-12" />
-                          <Skeleton className="h-4 w-12" />
-                          <Skeleton className="h-4 w-12" />
-                        </>
-                      ) : (
-                        <>
-                          <Badge variant="outline">
-                            {userStats.get(user.id)?.totalPosts ?? 0} posts
-                          </Badge>
-                          <Badge variant="secondary">
-                            {userStats.get(user.id)?.completedTodos ?? 0} done
-                          </Badge>
-                          <Badge
-                            variant={
-                              (userStats.get(user.id)?.pendingTodos ?? 0) > 0
-                                ? "destructive"
-                                : "secondary"
-                            }
-                          >
-                            {userStats.get(user.id)?.pendingTodos ?? 0} pending
-                          </Badge>
-                        </>
+                  <CardContent className="flex items-start gap-3">
+                    <div
+                      className={cn(
+                        "h-9 w-9 rounded-full flex items-center justify-center text-white text-sm font-semibold shrink-0 mt-0.5",
+                        getAvatarColor(user.id),
                       )}
+                    >
+                      {getInitials(user.name)}
+                    </div>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div>
+                        <p className="font-medium truncate leading-tight">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {user.email}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {user.company.name}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {statsLoading ? (
+                          <>
+                            <Skeleton className="h-4 w-12" />
+                            <Skeleton className="h-4 w-12" />
+                            <Skeleton className="h-4 w-12" />
+                          </>
+                        ) : (
+                          <>
+                            <Badge variant="outline">
+                              {userStats.get(user.id)?.totalPosts ?? 0} posts
+                            </Badge>
+                            <Badge variant="secondary">
+                              {userStats.get(user.id)?.completedTodos ?? 0} done
+                            </Badge>
+                            <Badge
+                              variant={
+                                (userStats.get(user.id)?.pendingTodos ?? 0) > 0
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                            >
+                              {userStats.get(user.id)?.pendingTodos ?? 0}{" "}
+                              pending
+                            </Badge>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
