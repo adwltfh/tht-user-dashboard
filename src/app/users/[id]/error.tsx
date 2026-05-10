@@ -26,7 +26,7 @@ export default function ErrorBoundary({
           Try again
         </Button>
         <Link href="/users">
-          <Button variant="ghost">← Back to list</Button>
+          <Button variant="ghost">Back to list</Button>
         </Link>
       </div>
     </main>
