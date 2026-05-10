@@ -135,7 +135,7 @@ const UserDetailPage = async ({ params }: Props) => {
 
           <Separator />
 
-          {/* Address */}
+          {/* address */}
           <Section title="Address">
             <Field
               label="Street"
